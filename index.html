@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanSpirit AI — Google Pay AI Checkout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Official Google Pay JS SDK -->
+  <script async defer src="https://pay.google.com/gp/p/js/pay.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-badge">MCP Grounded</span>
+        <h1>Google Pay Checkout</h1>
+      </div>
+      <p class="subtitle">Antigravity AI Internship Training Demo</p>
+    </header>
+
+    <main class="checkout-card">
+      <section class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="item-row">
+          <div class="item-info">
+            <span class="item-title">AI Agent Developer Subscription</span>
+            <span class="item-desc">Monthly Pro Access — Antigravity Workspace</span>
+          </div>
+          <span class="item-price">$29.99</span>
+        </div>
+        <div class="divider"></div>
+        <div class="total-row">
+          <span>Total Amount</span>
+          <span class="total-price" id="cart-total">$29.99</span>
+        </div>
+      </section>
+
+      <section class="payment-section">
+        <h3>Express Payment</h3>
+        <p class="section-desc">Fast, secure checkout with Google Pay TEST environment.</p>
+
+        <!-- Google Pay Button Container -->
+        <div id="gpay-button-container" class="gpay-wrapper"></div>
+
+        <!-- Status Feedback -->
+        <div id="checkout-status" class="status-box"></div>
+      </section>
+    </main>
+
+    <!-- Modal for Checkout Confirmation & Surcharge Review -->
+    <div id="review-modal" class="modal-overlay">
+      <div class="modal-card review-card">
+        <h3>Review & Authorize Payment</h3>
+        <p class="modal-sub">Verify final itemized total including card funding surcharge before acquirer authorization.</p>
+        
+        <div class="review-breakdown">
+          <div class="breakdown-row">
+            <span>Base Order Amount</span>
+            <span id="review-base-price" class="row-value">$29.99</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Payment Method</span>
+            <span id="review-card-info" class="row-value badge">CARD (CREDIT)</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Card Funding Surcharge (<span id="review-surcharge-rate">0.5%</span>)</span>
+            <span id="review-surcharge-amount" class="row-value surcharge-text">+$0.15</span>
+          </div>
+          <div class="divider"></div>
+          <div class="breakdown-row final-row">
+            <span>Final Total to Charge</span>
+            <span id="review-final-total" class="row-value final-price">$30.14</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancel-review-btn" class="btn-secondary">Cancel</button>
+          <button id="authorize-btn" class="btn-primary">Confirm & Authorize with Acquirer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for displaying payment results -->
+    <div id="result-modal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Payment Result Payload</h3>
+        <p class="modal-sub">Received tokenized payload from Google Pay (sensitive data omitted):</p>
+        <pre id="modal-payload-content"></pre>
+        <button id="close-modal-btn" class="btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
