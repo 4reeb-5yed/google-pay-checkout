@@ -55,7 +55,9 @@ export function getBaseCardPaymentMethod() {
 }
 
 /**
- * Full card payment method with tokenization specification for loadPaymentData
+ * Full card payment method with tokenization specification for standard loadPaymentData.
+ * Note: Currently unused in active request path in favor of getGuestCardPaymentMethod() in src/guestCheckout.js,
+ * but retained here for standard non-guest checkout compatibility.
  */
 export function getCardPaymentMethod() {
   return Object.assign(
