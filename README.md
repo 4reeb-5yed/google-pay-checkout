@@ -1,4 +1,4 @@
-# Google Pay AI Checkout — Built with Antigravity + MCP
+# Google Pay API Checkout — Built with Antigravity + MCP
 
 A working Google Pay checkout — one-time purchase, subscription billing, dynamic surcharge pricing, and express guest checkout — built almost entirely by *prompting* an AI coding agent connected to a live documentation server, instead of hand-writing the integration from memory or copy-pasted tutorials.
 
