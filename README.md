@@ -114,6 +114,13 @@ See [`docs/architecture.md`](docs/architecture.md) for full diagrams. Summary:
 
 None of the above is needed just to **run** the checkout page — only to develop it further using the same MCP-grounded workflow.
 
+### Clone the repository
+
+```bash
+git clone https://github.com/4reeb-5yed/google-pay-antigravity-checkout.git
+cd google-pay-antigravity-checkout
+```
+
 ### Run locally — plain Python
 
 No build step, no dependencies:
