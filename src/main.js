@@ -37,12 +37,17 @@ async function initApp() {
       // 2. Render Google Pay Button
       renderGooglePayButton(container, handlePaymentClick);
     } else {
-      statusEl.innerHTML = '<span class="status-warning">Google Pay is not available on this device/browser.</span>';
+      const isBlocked = typeof google === 'undefined' || !google?.payments?.api;
+      if (isBlocked) {
+        statusEl.innerHTML = '<span class="status-warning">⚠️ Google Pay SDK is blocked by your browser (e.g. Brave Shields / AdBlocker). Turn off Shields or AdBlocker for <code>localhost</code> to enable Google Pay.</span>';
+      } else {
+        statusEl.innerHTML = '<span class="status-warning">Google Pay is not available on this device/browser.</span>';
+      }
       container.style.display = 'none';
     }
   } catch (error) {
     console.error('Initialization error:', error);
-    statusEl.innerHTML = `<span class="status-error">Initialization error: ${error.message}</span>`;
+    statusEl.innerHTML = '<span class="status-warning">⚠️ Google Pay SDK failed to load. If using Brave Browser or an AdBlocker, please disable Shields/AdBlocker for <code>localhost</code> and refresh.</span>';
   }
 }
 

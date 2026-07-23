@@ -9,10 +9,10 @@ let paymentsClient = null;
 
 /**
  * Ensures Google Pay JavaScript SDK is fully loaded before client initialization.
- * @param {number} timeoutMs - Maximum milliseconds to wait for script loading
+ * @param {number} timeoutMs - Maximum milliseconds to wait for script loading (default 3s)
  * @returns {Promise<boolean>}
  */
-export function waitForGooglePaySdk(timeoutMs = 10000) {
+export function waitForGooglePaySdk(timeoutMs = 3000) {
   return new Promise((resolve) => {
     if (typeof google !== 'undefined' && google?.payments?.api) {
       return resolve(true);
