@@ -37,5 +37,17 @@
 - **Resolution & Grounding**:
   - Sourced standard Google Pay Web API v2 guest checkout parameters (`emailRequired: true`, `shippingAddressRequired: true`, `shippingAddressParameters: { phoneNumberRequired: true }`, `billingAddressRequired: true`, `billingAddressParameters: { format: 'FULL', phoneNumberRequired: true }`) directly from official API specifications, and noted explicitly that these were not extracted from MCP snippet text.
 
+## Guest Contact Data Fallback Transparency Fix
+
+- **Date / Context**: Refactoring `parseGuestContactData()` in [`src/guestCheckout.js`](file:///e:/google-pay-antigravity-checkout/src/guestCheckout.js).
+- **Bug Corrected**:
+  - `parseGuestContactData()` originally fell back to placeholder contact/address data (`guest.developer@example.com`, `123 Innovation Way`, etc.) silently without warning or indication when test payloads omitted email or address fields.
+- **Fix Applied**:
+  - Mirrored the pattern established in [`src/pricing.js`](file:///e:/google-pay-antigravity-checkout/src/pricing.js):
+  - Emits visible `console.warn` logs (`[Google Pay Checkout Warning] <field> missing from PaymentData payload. Falling back to simulated value...`) whenever a fallback triggers.
+  - Returns `isEmailSimulated`, `isShippingSimulated`, and `isBillingSimulated` flags.
+  - Appends `(simulated)` markers on the review modal UI and sanitized result payload for any contact/address fields using placeholder data.
+
+
 
 

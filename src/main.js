@@ -201,10 +201,14 @@ async function handlePaymentClick() {
     const cardDisplayLabel = `${cardNetwork} (${fundingSource})${isSimulated ? ' (simulated)' : ''}`;
 
     // Populate review modal with guest details & selected attributes
+    const emailDisplay = `${guestContact.email}${guestContact.isEmailSimulated ? ' (simulated)' : ''}`;
+    const shippingDisplay = `${guestContact.shippingAddress.address1}, ${guestContact.shippingAddress.locality} (${guestContact.shippingAddress.phoneNumber})${guestContact.isShippingSimulated ? ' (simulated)' : ''}`;
+    const billingDisplay = `${guestContact.billingAddress.address1}, ${guestContact.billingAddress.locality}${guestContact.isBillingSimulated ? ' (simulated)' : ''}`;
+
     document.getElementById('review-attributes').textContent = attributeValidation.summary;
-    document.getElementById('review-email').textContent = guestContact.email;
-    document.getElementById('review-shipping').textContent = `${guestContact.shippingAddress.address1}, ${guestContact.shippingAddress.locality} (${guestContact.shippingAddress.phoneNumber})`;
-    document.getElementById('review-billing').textContent = `${guestContact.billingAddress.address1}, ${guestContact.billingAddress.locality}`;
+    document.getElementById('review-email').textContent = emailDisplay;
+    document.getElementById('review-shipping').textContent = shippingDisplay;
+    document.getElementById('review-billing').textContent = billingDisplay;
 
     document.getElementById('review-base-price').textContent = `$${basePriceNum.toFixed(2)}${unitSuffix}`;
     document.getElementById('review-card-info').textContent = cardDisplayLabel;
@@ -253,14 +257,21 @@ function setupModalListeners() {
       statusEl.innerHTML = `<span class="status-success">Payment ${pendingAuthorization.isRecurring ? '& MIT mandate ' : ''}authorized successfully with Sabre acquirer!</span>`;
 
       const paymentData = pendingAuthorization.paymentData;
+      const gc = pendingAuthorization.guestContact;
       const sanitizedData = {
         apiVersion: paymentData.apiVersion,
         apiVersionMinor: paymentData.apiVersionMinor,
         checkoutType: pendingAuthorization.isRecurring ? 'RECURRING_SUBSCRIPTION' : 'ONE_TIME_PURCHASE',
         selectedProductOptions: pendingAuthorization.selectedAttributes,
-        guestEmail: pendingAuthorization.guestContact.email,
-        guestShippingAddress: pendingAuthorization.guestContact.shippingAddress,
-        guestBillingAddress: pendingAuthorization.guestContact.billingAddress,
+        guestEmail: gc.email + (gc.isEmailSimulated ? ' (simulated)' : ''),
+        guestShippingAddress: {
+          ...gc.shippingAddress,
+          isSimulated: gc.isShippingSimulated
+        },
+        guestBillingAddress: {
+          ...gc.billingAddress,
+          isSimulated: gc.isBillingSimulated
+        },
         gateway: pendingAuthorization.gateway,
         cardFundingSource: pendingAuthorization.cardFundingSource,
         isFundingSourceSimulated: pendingAuthorization.isSimulated,

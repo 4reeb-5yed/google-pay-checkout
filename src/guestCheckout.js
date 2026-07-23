@@ -43,41 +43,68 @@ export function getGuestCardPaymentMethod() {
 
 /**
  * Extracts and formats email, shipping address, phone number, and billing address from Google Pay response.
+ * Logs console.warn messages and flags simulated states whenever payload fields are missing.
+ * 
  * @param {Object} paymentData - Google Pay loadPaymentData response payload
- * @returns {Object} Guest contact & address details
+ * @returns {Object} Guest contact & address details with simulation flags
  */
 export function parseGuestContactData(paymentData) {
-  const email = paymentData?.email || 'guest.developer@example.com';
-  const shipping = paymentData?.shippingAddress || {};
-  const paymentMethodData = paymentData?.paymentMethodData || {};
-  const billing = paymentMethodData.info?.billingAddress || {};
+  let isEmailSimulated = false;
+  let isShippingSimulated = false;
+  let isBillingSimulated = false;
 
-  const formattedShipping = {
-    name: shipping.name || 'John Doe (Guest)',
-    address1: shipping.address1 || '123 Innovation Way',
-    address2: shipping.address2 || 'Suite 400',
-    locality: shipping.locality || 'San Francisco',
-    administrativeArea: shipping.administrativeArea || 'CA',
-    postalCode: shipping.postalCode || '94105',
-    countryCode: shipping.countryCode || 'US',
-    phoneNumber: shipping.phoneNumber || '+1 (555) 019-2834'
+  // 1. Email Extraction & Fallback
+  let email = paymentData?.email;
+  if (!email) {
+    console.warn('[Google Pay Checkout Warning] email field missing from PaymentData payload. Falling back to simulated value: guest.developer@example.com.');
+    isEmailSimulated = true;
+    email = 'guest.developer@example.com';
+  }
+
+  // 2. Shipping Address Extraction & Fallback
+  const rawShipping = paymentData?.shippingAddress;
+  if (!rawShipping || !rawShipping.address1) {
+    console.warn('[Google Pay Checkout Warning] shippingAddress field missing from PaymentData payload. Falling back to simulated address: 123 Innovation Way, San Francisco, CA.');
+    isShippingSimulated = true;
+  }
+
+  const shippingAddress = {
+    name: rawShipping?.name || 'John Doe (Guest)',
+    address1: rawShipping?.address1 || '123 Innovation Way',
+    address2: rawShipping?.address2 || 'Suite 400',
+    locality: rawShipping?.locality || 'San Francisco',
+    administrativeArea: rawShipping?.administrativeArea || 'CA',
+    postalCode: rawShipping?.postalCode || '94105',
+    countryCode: rawShipping?.countryCode || 'US',
+    phoneNumber: rawShipping?.phoneNumber || '+1 (555) 019-2834'
   };
 
-  const formattedBilling = {
-    name: billing.name || formattedShipping.name,
-    address1: billing.address1 || formattedShipping.address1,
-    locality: billing.locality || formattedShipping.locality,
-    administrativeArea: billing.administrativeArea || formattedShipping.administrativeArea,
-    postalCode: billing.postalCode || formattedShipping.postalCode,
-    countryCode: billing.countryCode || formattedShipping.countryCode,
-    phoneNumber: billing.phoneNumber || formattedShipping.phoneNumber
+  // 3. Billing Address Extraction & Fallback
+  const paymentMethodData = paymentData?.paymentMethodData || {};
+  const rawBilling = paymentMethodData.info?.billingAddress;
+  if (!rawBilling || !rawBilling.address1) {
+    console.warn('[Google Pay Checkout Warning] billingAddress field missing from PaymentData payload. Falling back to simulated address: 123 Innovation Way, San Francisco, CA.');
+    isBillingSimulated = true;
+  }
+
+  const billingAddress = {
+    name: rawBilling?.name || shippingAddress.name,
+    address1: rawBilling?.address1 || shippingAddress.address1,
+    locality: rawBilling?.locality || shippingAddress.locality,
+    administrativeArea: rawBilling?.administrativeArea || shippingAddress.administrativeArea,
+    postalCode: rawBilling?.postalCode || shippingAddress.postalCode,
+    countryCode: rawBilling?.countryCode || shippingAddress.countryCode,
+    phoneNumber: rawBilling?.phoneNumber || shippingAddress.phoneNumber
   };
 
   return {
     email,
-    shippingAddress: formattedShipping,
-    billingAddress: formattedBilling,
-    displayShippingString: `${formattedShipping.address1}, ${formattedShipping.locality}, ${formattedShipping.administrativeArea} ${formattedShipping.postalCode}`,
-    displayBillingString: `${formattedBilling.address1}, ${formattedBilling.locality}, ${formattedBilling.administrativeArea} ${formattedBilling.postalCode}`
+    isEmailSimulated,
+    shippingAddress,
+    isShippingSimulated,
+    billingAddress,
+    isBillingSimulated,
+    displayShippingString: `${shippingAddress.address1}, ${shippingAddress.locality}, ${shippingAddress.administrativeArea} ${shippingAddress.postalCode}`,
+    displayBillingString: `${billingAddress.address1}, ${billingAddress.locality}, ${billingAddress.administrativeArea} ${billingAddress.postalCode}`
   };
 }
