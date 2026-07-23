@@ -46,7 +46,18 @@
   - Mirrored the pattern established in [`src/pricing.js`](file:///e:/google-pay-antigravity-checkout/src/pricing.js):
   - Emits visible `console.warn` logs (`[Google Pay Checkout Warning] <field> missing from PaymentData payload. Falling back to simulated value...`) whenever a fallback triggers.
   - Returns `isEmailSimulated`, `isShippingSimulated`, and `isBillingSimulated` flags.
-  - Appends `(simulated)` markers on the review modal UI and sanitized result payload for any contact/address fields using placeholder data.
+## CheckoutOption Enum Lookup & Grounding Note
+
+- **Date / Context**: Verification of `checkoutOption` field name, allowed enum values, and placement on `transactionInfo` for standard one-time purchases.
+- **Observation**:
+  - `search_documentation` for `checkoutOption DEFAULT COMPLETE_IMMEDIATE_PURCHASE CONTINUE_TO_REVIEW` returned high-level developer quickstarts, but did not return raw field definitions or enum strings in its text snippets.
+- **Resolution & Grounding (Sourced from Official API Reference Docs, Not MCP)**:
+  - Official Google Pay Web API v2 enum values for `checkoutOption`:
+    - `'DEFAULT'`: Standard button label behavior on the Google Pay sheet.
+    - `'COMPLETE_IMMEDIATE_PURCHASE'`: Renders a **"Pay"** button on the payment sheet for direct immediate purchases.
+    - `'CONTINUE_TO_REVIEW'`: Renders a **"Continue"** button on the payment sheet for multi-step order review.
+  - Placed `checkoutOption: 'COMPLETE_IMMEDIATE_PURCHASE'` strictly inside `transactionInfo` in [`src/main.js`](file:///e:/google-pay-antigravity-checkout/src/main.js#L157-L161) for the one-time purchase path (`$29.99`). It is omitted from `recurringTransactionInfo` as `checkoutOption` is not part of the top-level recurring schema.
+
 
 
 

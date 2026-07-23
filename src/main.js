@@ -157,7 +157,8 @@ async function handlePaymentClick() {
       transactionData = {
         totalPrice: currentCart.totalPrice,
         currencyCode: currentCart.currencyCode,
-        totalPriceStatus: currentCart.totalPriceStatus
+        totalPriceStatus: currentCart.totalPriceStatus,
+        checkoutOption: 'COMPLETE_IMMEDIATE_PURCHASE'
       };
     }
 
