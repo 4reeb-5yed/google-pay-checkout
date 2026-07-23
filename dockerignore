@@ -1,0 +1,5 @@
+.git
+docs/
+*.md
+implementation_plan.md
+.gitignore
