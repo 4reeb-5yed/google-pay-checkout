@@ -159,4 +159,4 @@ No automated test suite — everything was verified manually against the real Go
 
 ---
 
-**Areeb Syed** · CanSpirit AI Internship
+**Areeb Syed** 
