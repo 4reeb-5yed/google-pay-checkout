@@ -117,8 +117,8 @@ None of the above is needed just to **run** the checkout page — only to develo
 ### Clone the repository
 
 ```bash
-git clone https://github.com/4reeb-5yed/google-pay-antigravity-checkout.git
-cd google-pay-antigravity-checkout
+git clone https://github.com/4reeb-5yed/google-pay-checkout.git
+cd google-pay-checkout
 ```
 
 ### Run locally — plain Python
