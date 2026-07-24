@@ -3,160 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Pay API Checkout</title>
+  <title>Google Pay Store — Mixed Hardware & Cloud Marketplace</title>
+  <meta name="description" content="Explore creator hardware devices, accessories, and cloud extension plans with Google Pay integration.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  
-  <!-- Official Google Pay JS SDK -->
+  <link rel="stylesheet" href="/style.css">
+
+  <!-- Official Google Pay JS SDK (loaded for Phase 3/4) -->
   <script async defer src="https://pay.google.com/gp/p/js/pay.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <header class="app-header">
-      <div class="logo">
-        <span class="logo-badge">MCP Grounded</span>
-        <h1>Google Pay Checkout</h1>
-      </div>
-    
-    </header>
+  <!-- Header Navigation Container -->
+  <header id="main-header" class="header"></header>
 
-    <main class="checkout-card">
-      <section class="product-attributes">
-        <h2>Product Options <span class="required-tag">*Required for Checkout</span></h2>
-        
-        <!-- Size Selector -->
-        <div class="attribute-group">
-          <label class="attribute-label">Size:</label>
-          <div class="attribute-options" id="size-options">
-            <button type="button" class="attr-pill" data-type="size" data-value="S">S</button>
-            <button type="button" class="attr-pill" data-type="size" data-value="M">M</button>
-            <button type="button" class="attr-pill" data-type="size" data-value="L">L</button>
-            <button type="button" class="attr-pill" data-type="size" data-value="XL">XL</button>
-          </div>
-        </div>
+  <!-- Main SPA Container -->
+  <main id="app"></main>
 
-        <!-- Color Selector -->
-        <div class="attribute-group">
-          <label class="attribute-label">Color:</label>
-          <div class="attribute-options" id="color-options">
-            <button type="button" class="attr-pill color-pill" data-type="color" data-value="Space Gray"><span class="color-dot space-gray"></span>Space Gray</button>
-            <button type="button" class="attr-pill color-pill" data-type="color" data-value="Silver"><span class="color-dot silver"></span>Silver</button>
-            <button type="button" class="attr-pill color-pill" data-type="color" data-value="Midnight Blue"><span class="color-dot midnight"></span>Midnight Blue</button>
-          </div>
-        </div>
-
-        <!-- Attribute Validation Warning Banner -->
-        <div id="attribute-alert" class="alert-box hidden">
-          ⚠️ Please select both <strong>Size</strong> and <strong>Color</strong> before clicking Google Pay!
-        </div>
-      </section>
-
-      <div class="divider"></div>
-
-      <section class="order-summary">
-        <h2>Order Summary</h2>
-        <div class="plan-selector">
-          <label class="plan-option active" id="plan-option-recurring">
-            <input type="radio" name="checkout-plan" value="recurring" checked>
-            <div class="plan-details">
-              <span class="plan-name">Monthly Subscription <span class="badge">Recurring</span></span>
-              <span class="plan-desc">Monthly Pro Access — $14.99/month</span>
-            </div>
-            <span class="plan-price">$14.99/mo</span>
-          </label>
-
-          <label class="plan-option" id="plan-option-onetime">
-            <input type="radio" name="checkout-plan" value="onetime">
-            <div class="plan-details">
-              <span class="plan-name">One-Time Purchase</span>
-              <span class="plan-desc">Lifetime Single License Access</span>
-            </div>
-            <span class="plan-price">$29.99</span>
-          </label>
-        </div>
-
-        <div class="divider"></div>
-        <div class="total-row">
-          <span id="total-label">Monthly Total</span>
-          <span class="total-price" id="cart-total">$14.99<span id="total-period" style="font-size: 12px; color: var(--text-secondary);">/mo</span></span>
-        </div>
-      </section>
-
-      <section class="payment-section">
-        <h3>Express Guest Checkout</h3>
-        <p class="section-desc">Fast, automated address & email collection via Google Pay TEST environment.</p>
-
-        <!-- Google Pay Button Container -->
-        <div id="gpay-button-container" class="gpay-wrapper"></div>
-
-        <!-- Status Feedback -->
-        <div id="checkout-status" class="status-box"></div>
-      </section>
-    </main>
-
-    <!-- Modal for Checkout Confirmation & Surcharge Review -->
-    <div id="review-modal" class="modal-overlay">
-      <div class="modal-card review-card">
-        <h3>Review & Authorize Payment</h3>
-        <p class="modal-sub">Verify itemized total, collected guest contact details, and shipping address before acquirer authorization.</p>
-        
-        <div class="review-breakdown">
-          <div class="breakdown-row">
-            <span>Selected Options</span>
-            <span id="review-attributes" class="row-value highlight-text">None</span>
-          </div>
-          <div class="breakdown-row">
-            <span>Contact Email</span>
-            <span id="review-email" class="row-value">guest.developer@example.com</span>
-          </div>
-          <div class="breakdown-row">
-            <span>Shipping Address</span>
-            <span id="review-shipping" class="row-value address-text">123 Innovation Way, CA</span>
-          </div>
-          <div class="breakdown-row">
-            <span>Card Billing Address</span>
-            <span id="review-billing" class="row-value address-text">123 Innovation Way, CA</span>
-          </div>
-          <div class="divider"></div>
-          <div class="breakdown-row">
-            <span>Base Order Amount</span>
-            <span id="review-base-price" class="row-value">$14.99/mo</span>
-          </div>
-          <div class="breakdown-row">
-            <span>Payment Method</span>
-            <span id="review-card-info" class="row-value badge">CARD (CREDIT)</span>
-          </div>
-          <div class="breakdown-row">
-            <span>Card Funding Surcharge (<span id="review-surcharge-rate">0.5%</span>)</span>
-            <span id="review-surcharge-amount" class="row-value surcharge-text">+$0.07</span>
-          </div>
-          <div class="divider"></div>
-          <div class="breakdown-row final-row">
-            <span>Final Total to Charge</span>
-            <span id="review-final-total" class="row-value final-price">$15.06/mo</span>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button id="cancel-review-btn" class="btn-secondary">Cancel</button>
-          <button id="authorize-btn" class="btn-primary">Confirm & Authorize with Acquirer</button>
-        </div>
-      </div>
+  <!-- Global Footer -->
+  <footer class="footer">
+    <div class="footer-trust-badge">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      <span>Test Environment — No real charges will be made.</span>
     </div>
+  </footer>
 
-    <!-- Modal for displaying payment results -->
-    <div id="result-modal" class="modal-overlay">
-      <div class="modal-card">
-        <h3>Payment Result Payload</h3>
-        <p class="modal-sub">Received tokenized payload from Google Pay (sensitive data omitted):</p>
-        <pre id="modal-payload-content"></pre>
-        <button id="close-modal-btn" class="btn-primary">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="./src/main.js"></script>
+  <!-- SVG Assets & Application Scripts -->
+  <script src="/public/js/svg-assets.js"></script>
+  <script src="/public/js/app.js"></script>
 </body>
 </html>
