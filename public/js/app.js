@@ -35,6 +35,9 @@
     }
   }
 
+  // Expose globally for checkout module
+  window.appApiFetch = apiFetch;
+
   // --- Toast Manager ---
   function showToast(message, actionText = null, actionCallback = null) {
     let container = document.getElementById('toast-container');
@@ -68,6 +71,8 @@
     }, 4000);
   }
 
+  window.showToast = showToast;
+
   // --- Cart Badge Update ---
   async function updateCartCount() {
     try {
@@ -90,6 +95,8 @@
     route();
   }
 
+  window.navigate = navigate;
+
   window.addEventListener('popstate', () => {
     route();
   });
@@ -97,7 +104,6 @@
   document.addEventListener('click', (e) => {
     const anchor = e.target.closest('a');
     if (anchor && anchor.getAttribute('href') && anchor.getAttribute('href').startsWith('/')) {
-      // Don't intercept external links or special paths
       const href = anchor.getAttribute('href');
       if (!href.startsWith('/api/') && !href.startsWith('//')) {
         e.preventDefault();
@@ -111,7 +117,6 @@
     const appEl = document.getElementById('app');
     if (!appEl) return;
 
-    // Update Header Navigation Active State
     updateHeaderNav(path);
     updateCartCount();
 
@@ -122,8 +127,13 @@
       await renderProductDetailPage(appEl, productId);
     } else if (path === '/cart') {
       await renderCartPage(appEl);
+    } else if (path === '/checkout') {
+      if (typeof window.renderCheckoutPage === 'function') {
+        await window.renderCheckoutPage(appEl);
+      } else {
+        appEl.innerHTML = `<div style="color: var(--error); padding: 2rem;">Checkout page module not loaded.</div>`;
+      }
     } else {
-      // Fallback: catalog
       await renderCatalogPage(appEl);
     }
   }
@@ -199,7 +209,6 @@
       </div>
     `;
 
-    // Add Filter Tab Click Listeners
     container.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const cat = e.target.getAttribute('data-category');
@@ -327,8 +336,8 @@
                   Add to Cart
                 </button>
 
-                <!-- Inert Google Pay Express Guest Checkout Placeholder for Phase 2 -->
-                <button type="button" class="gpay-placeholder-button" disabled title="Google Pay integration will be activated in Phase 3">
+                <!-- Inert Google Pay Express Guest Checkout Placeholder for Phase 2/3a -->
+                <button type="button" class="gpay-placeholder-button" disabled title="Product Page Express Guest Checkout will be integrated in Phase 3b">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
                   </svg>
@@ -362,12 +371,17 @@
         addBtn.addEventListener('click', async () => {
           const qty = qtyVal ? parseInt(qtyVal.value, 10) : 1;
           try {
-            await apiFetch('/api/cart', {
+            const res = await apiFetch('/api/cart', {
               method: 'POST',
               body: JSON.stringify({ productId: p.id, quantity: qty })
             });
             await updateCartCount();
-            showToast(`Added "${p.name}" to cart`);
+
+            if (res.replacedPlanName) {
+              showToast(`Updated subscription plan to "${p.name}" (replaced ${res.replacedPlanName})`);
+            } else {
+              showToast(`Added "${p.name}" to cart`);
+            }
           } catch (err) {
             showToast(`Failed to add item to cart: ${err.message}`);
           }
@@ -411,6 +425,7 @@
         return;
       }
 
+      const hasSubscription = cart.items.some(i => i.type === 'subscription');
       const estimate = estimateData?.estimate;
 
       container.innerHTML = `
@@ -418,6 +433,13 @@
           <h1 class="page-title">Your Shopping Cart</h1>
           <p class="page-subtitle">${cart.itemCount} ${cart.itemCount === 1 ? 'item' : 'items'} in your cart</p>
         </div>
+
+        ${hasSubscription ? `
+          <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>ℹ️</span>
+            <span><strong>Subscription Plan Notice:</strong> Adding a new plan replaces your previous plan. Only one active subscription plan can be in a cart at a time.</span>
+          </div>
+        ` : ''}
 
         <div class="cart-layout">
           <div class="cart-items-card">
@@ -490,12 +512,19 @@
               <span style="color: var(--accent);">${estimate ? estimate.minTotalFormatted + ' – ' + estimate.maxTotalFormatted : cart.subtotalFormatted}</span>
             </div>
 
-            <button type="button" class="btn-primary" style="width: 100%; text-align: center;" onclick="alert('Checkout page integration will be connected in Phase 3 & 4')">
+            <button type="button" class="btn-primary" style="width: 100%; text-align: center;" id="proceed-to-checkout-btn">
               Proceed to Checkout →
             </button>
           </div>
         </div>
       `;
+
+      const checkoutBtn = container.querySelector('#proceed-to-checkout-btn');
+      if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+          navigate('/checkout');
+        });
+      }
 
       // Attach Stepper Listeners
       container.querySelectorAll('.cart-qty-minus, .cart-qty-plus').forEach(btn => {

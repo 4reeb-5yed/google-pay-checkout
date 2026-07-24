@@ -159,12 +159,29 @@ app.post('/api/cart', (req, res) => {
   }
 
   // Check if product exists
-  const prodStmt = db.prepare('SELECT id FROM products WHERE id = ?');
-  if (!prodStmt.get(productId)) {
+  const targetProduct = db.prepare('SELECT id, name, category, type FROM products WHERE id = ?').get(productId);
+  if (!targetProduct) {
     return res.status(404).json({ error: 'Product not found' });
   }
 
   const cart = getOrCreateCart(req.sessionId);
+  let replacedPlanName = null;
+
+  // Single Subscription Plan Constraint:
+  // If adding a subscription plan, remove any existing different subscription plan from cart
+  if (targetProduct.type === 'subscription' || targetProduct.category === 'Plans') {
+    const existingPlanStmt = db.prepare(`
+      SELECT ci.id, p.name 
+      FROM cart_items ci 
+      JOIN products p ON ci.product_id = p.id 
+      WHERE ci.cart_id = ? AND (p.type = 'subscription' OR p.category = 'Plans') AND ci.product_id != ?
+    `);
+    const existingPlan = existingPlanStmt.get(cart.id, productId);
+    if (existingPlan) {
+      db.prepare('DELETE FROM cart_items WHERE id = ?').run(existingPlan.id);
+      replacedPlanName = existingPlan.name;
+    }
+  }
 
   const existingStmt = db.prepare('SELECT id, quantity FROM cart_items WHERE cart_id = ? AND product_id = ?');
   const existing = existingStmt.get(cart.id, productId);
@@ -182,7 +199,10 @@ app.post('/api/cart', (req, res) => {
   db.prepare('UPDATE carts SET updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(cart.id);
 
   const updatedCart = getCartDetails(req.sessionId);
-  res.status(201).json(updatedCart);
+  res.status(201).json({
+    ...updatedCart,
+    replacedPlanName
+  });
 });
 
 // PATCH /api/cart/items/:itemId — Update item quantity
