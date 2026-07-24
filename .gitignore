@@ -1,3 +1,7 @@
-﻿node_modules/
+node_modules/
 .env
 .DS_Store
+store.db
+store.db-journal
+store.db-wal
+
